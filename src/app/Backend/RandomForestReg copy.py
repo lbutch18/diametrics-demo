@@ -83,8 +83,8 @@ print("\n Feature Importance:")
 print(feature_importance.head(len(feature_columns)))
 
 # Save the trained model
-joblib.dump(rf_model, "rf_reg_100_diabetes_model.pkl", compress = 9)
-print("Model saved as rf_ref_100_diabetes_model.pkl")
+joblib.dump(rf_model, "rf_reg_100_diabetes_model.joblib", compress = 9)
+print("Model saved as rf_ref_100_diabetes_model.joblib")
 
 time_end = time.time()
 print(f"\nTotal Execution Time: {time_end - time_start:.2f} seconds")
