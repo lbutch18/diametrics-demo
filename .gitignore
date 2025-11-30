@@ -39,3 +39,30 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+RandomForestReg copy.py
+
+# Virtual environments
+venv/
+.venv
+
+# IDE
+.vscode/
+
+# Temporary files
+*.tmp
+*.bak
+*.log

@@ -7,17 +7,14 @@ import pandas as pd
 
 app = FastAPI()
 
-# Enable CORS so frontend can call this API
+# Enable CORS so frontend can call the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to frontend URL in production
+    allow_origins=["https://diametrics-demo.vercel.app/"],  # Use frontend URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Global variable to store model
-model = None
 
 # Load model when server starts
 @app.on_event("startup")
