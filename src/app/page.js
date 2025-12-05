@@ -4,7 +4,11 @@ import { useState } from 'react'
 
 export default function MyApp() {
   const [prediction, setPrediction] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   async function getSubmission(formData) {
+    setIsLoading(true);
+    setPrediction(null); // Clear previous prediction
+    
     const familyHistory = parseInt(formData.get("familyHistory"));
     const age = parseInt(formData.get("age"));
     const physicalActivity = parseInt(formData.get("physicalActivity"))*7;
@@ -34,11 +38,13 @@ export default function MyApp() {
       const result = await response.json();
 
       setPrediction(result.prediction);
+      setIsLoading(false);
     } catch (error) {
       alert("Error fetching prediction. Please try again.");
+      setIsLoading(false);
+      setPrediction(null); // Clear prediction on error too
       return;
     }
-
   }
 return (
   <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
@@ -157,12 +163,23 @@ return (
 
           <button 
             type="submit"
-            className="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 shadow-lg"
+            disabled={isLoading}
+            className="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 shadow-lg disabled:bg-indigo-400 disabled:cursor-not-allowed"
           >
-            Submit
+            {isLoading ? 'Loading...' : 'Submit'}
           </button>
         </form>
-        {prediction && (
+
+        {isLoading && (
+          <div className="mt-8 p-8 bg-white rounded-lg shadow-xl">
+            <div className="flex flex-col items-center justify-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mb-4"></div>
+              <p className="text-lg text-gray-600">Calculating your risk assessment...</p>
+            </div>
+          </div>
+        )}
+
+        {prediction && !isLoading && (
         <div className="mt-8 p-8 bg-white rounded-lg shadow-xl">
           {(() => {
           let riskLevel, riskColor, riskMessage;
@@ -205,6 +222,3 @@ return (
   </div>
 );
 }
-
-
-  
