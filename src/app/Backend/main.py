@@ -20,16 +20,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load models when server starts
-@app.on_event("startup")
-async def load_model_on_startup():
-    global risk_model, diagnosis_model
-    import os
-    # Get the directory where this script is located
-    backend_dir = os.path.dirname(os.path.abspath(__file__))
-    risk_model = load(os.path.join(backend_dir, 'rf_reg_100_diabetes_model.joblib'))
-    diagnosis_model = load(os.path.join(backend_dir, 'rf_diabetes_model.joblib'))
-    print("Both models loaded successfully!")
+# Lazy load models to reduce memory usage at startup
+risk_model = None
+diagnosis_model = None
+
+def get_risk_model():
+    global risk_model
+    if risk_model is None:
+        import os
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        risk_model = load(os.path.join(backend_dir, 'rf_reg_100_diabetes_model.joblib'))
+        print("Risk model loaded successfully!")
+    return risk_model
+
+def get_diagnosis_model():
+    global diagnosis_model
+    if diagnosis_model is None:
+        import os
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        diagnosis_model = load(os.path.join(backend_dir, 'rf_diabetes_model.joblib'))
+        print("Diagnosis model loaded successfully!")
+    return diagnosis_model
 
 # Define what data we expect from frontend for risk score prediction
 class PredictionInput(BaseModel):
@@ -99,8 +110,9 @@ async def predict(data: PredictionInput):
         'sleep_hours_per_day'
     ])
     
-    # Make prediction
-    prediction = risk_model.predict(features)
+    # Make prediction (lazy load model if needed)
+    model = get_risk_model()
+    prediction = model.predict(features)
     
     return {
         "prediction": int(prediction[0]),
@@ -110,8 +122,9 @@ async def predict(data: PredictionInput):
 @app.post("/diagnose")
 async def diagnose(data: DiagnosisInput):
     try:
-        # Use model's expected feature order
-        feature_names = diagnosis_model.feature_names_in_
+        # Use model's expected feature order (lazy load model if needed)
+        model = get_diagnosis_model()
+        feature_names = model.feature_names_in_
         
         # Create dictionary with all values
         feature_dict = {
@@ -186,7 +199,7 @@ async def diagnose(data: DiagnosisInput):
                     features[col] = features[col].astype('float64')
         
         # Make prediction (binary classification: 0 = No Diabetes, 1 = Diabetes)
-        prediction = diagnosis_model.predict(features)
+        prediction = model.predict(features)
         
         return {
             "diagnosis": int(prediction[0]),
