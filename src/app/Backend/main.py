@@ -24,8 +24,11 @@ app.add_middleware(
 @app.on_event("startup")
 async def load_model_on_startup():
     global risk_model, diagnosis_model
-    risk_model = load('rf_reg_100_diabetes_model.joblib')
-    diagnosis_model = load('rf_diabetes_model.joblib')
+    import os
+    # Get the directory where this script is located
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    risk_model = load(os.path.join(backend_dir, 'rf_reg_100_diabetes_model.joblib'))
+    diagnosis_model = load(os.path.join(backend_dir, 'rf_diabetes_model.joblib'))
     print("Both models loaded successfully!")
 
 # Define what data we expect from frontend for risk score prediction
